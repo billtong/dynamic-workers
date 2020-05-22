@@ -2,34 +2,49 @@ defmodule Todo.Auth do
   @name_key "username"
   @password_key "password"
 
-  def process(auth, name) do
-    choose_loop(auth, name)
-  end
-
-  def choose_loop(server, name) do
+  @doc """
+  this is for cli
+  """
+  def process(server, name) do
     case String.trim(IO.gets("Are you going to login, no for sign up[y/n/exit]:")) do      
       "y" -> 
-        login_loop(server, name)
+        login_username_check(server, name)
       "n" -> 
         new_user_check(server, name)
       "exit" -> 
-        False
+        false
        _ -> 
         IO.puts "wrong input, There 3 valid input: 'y' for yes;'n' for no; 'exit' for exit."
-        choose_loop(server, name)
+        process(server, name)
     end
   end
 
-  defp login_loop(server, name) do
+  defp login_username_check(server, name) do
+    try do
+      list = Todo.Server.entries(server, @name_key, name)
+      cond do
+        list == [] || list == nil ->
+          IO.puts("user not exist! please try again")
+          false
+        true ->
+          IO.puts "user check result: exit"
+          login_password_check(server, name, list)
+      end
+    rescue
+      e in RuntimeError -> IO.puts("user not exist! please try again")
+      false
+    end
+  end
+
+  defp login_password_check(server, name, [%{@password_key=>value}] = list) do
     password = String.trim(IO.gets "user login_loop page:\nusername: #{name}\npassword[enter password]: ")
-    [%{@password_key=>value}] = Todo.Server.entries(server, @name_key, name)
     cond do
       password == value ->
         IO.puts "login success, welcom back :)"
         true
       true ->
         IO.puts "confirm password doesn't match, please try again"
-        register_loop(server, name)
+        login_password_check(server, name, list)
     end
   end
 
@@ -52,7 +67,7 @@ defmodule Todo.Auth do
         user = %{@name_key=>name, @password_key=>password}
         Todo.Server.add_entry(server, user)
         IO.puts "register success, redirecting to login page..."
-        login_loop(server, name)
+        login_username_check(server, name)
       true ->
         IO.puts "confirm password doesn't match, please try again"
         register_loop(server, name)
