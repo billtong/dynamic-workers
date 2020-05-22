@@ -7,7 +7,6 @@ defmodule Todo.System do
         Todo.Cache
       ],
       strategy: :one_for_one
-      # Other strategies are :one_for_all and :rest_for_one
     )
   end
 end

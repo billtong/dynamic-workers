@@ -20,9 +20,12 @@ defmodule Todo.List do
     %Todo.List{todo_list | entries: new_entries, auto_id: todo_list.auto_id + 1}
   end
 
-  def entries(todo_list, date) do
+  @doc """
+  use dynamic key to search the wanted data in the todo_list(user or todolist)
+  """
+  def entries(todo_list, key, search) do
     todo_list.entries
-    |> Stream.filter(fn {_, entry} -> entry.date == date end)
+    |> Stream.filter(fn {_, %{^key => value}} -> value == search end)
     |> Enum.map(fn {_, entry} -> entry end)
   end
 

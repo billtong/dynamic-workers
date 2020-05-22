@@ -14,6 +14,9 @@ defmodule Todo.Database do
     Supervisor.child_spec(default_worker_spec, id: worker_id)
   end
 
+  @doc """
+    the child specification describes how the Todo.Database start
+  """
   def child_spec(_) do
     %{
       id: __MODULE__,
@@ -34,6 +37,9 @@ defmodule Todo.Database do
     |> Todo.DatabaseWorker.get(key)
   end
 
+  @doc """
+    it works as a simple load balance
+  """
   defp choose_worker(key) do
     :erlang.phash2(key, @pool_size) + 1
   end

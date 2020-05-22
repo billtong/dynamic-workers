@@ -16,6 +16,7 @@ defmodule Todo.Cache do
     case start_child(todo_list_name) do
       {:ok, pid} -> pid
       {:error, {:already_started, pid}} -> pid
+      {:error, :ok} -> :failed
     end
   end
 
